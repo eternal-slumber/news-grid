@@ -1,0 +1,64 @@
+x-laravel-environment: &laravel-environment
+  APP_ENV: ${APP_ENV:-local}
+  APP_DEBUG: ${APP_DEBUG:-true}
+  APP_KEY: ${APP_KEY:?APP_KEY must be set in .env}
+  APP_URL: http://localhost:${APP_PORT:-8000}
+  LOG_CHANNEL: stderr
+  DB_CONNECTION: pgsql
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_DATABASE: ${DB_DATABASE:-news_grid}
+  DB_USERNAME: ${DB_USERNAME:-news_grid}
+  DB_PASSWORD: ${DB_PASSWORD:-secret}
+  CACHE_STORE: database
+  SESSION_DRIVER: database
+  QUEUE_CONNECTION: database
+  DB_QUEUE_RETRY_AFTER: 180
+
+services:
+  app:
+    build: .
+    image: news-grid-app
+    environment: *laravel-environment
+    command: ["sh", "-c", "php artisan migrate --force && exec php artisan serve --host=0.0.0.0 --port=8000"]
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/up') === false);"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-news_grid}
+      POSTGRES_USER: ${DB_USERNAME:-news_grid}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "${FORWARD_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  worker:
+    image: news-grid-app
+    environment: *laravel-environment
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--timeout=120"]
+    depends_on:
+      app:
+        condition: service_healthy
+    stop_grace_period: 130s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

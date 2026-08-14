@@ -1,0 +1,9 @@
+.git
+.env
+.agents
+.codex
+node_modules
+vendor
+public/build
+storage/logs/*
+bootstrap/cache/*.php
