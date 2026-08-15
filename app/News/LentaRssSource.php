@@ -73,9 +73,8 @@ final class LentaRssSource
             imageUrl: $this->optionalText($item->enclosure['url']),
             publishedAt: CarbonImmutable::parse(
                 $this->requiredText($item->pubDate, 'pubDate'),
-            ),
+            )->utc(),
         );
-
     }
 
     private function requiredText(SimpleXMLElement $element, string $field): string

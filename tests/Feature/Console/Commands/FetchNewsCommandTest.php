@@ -57,7 +57,9 @@ test('it stores new articles once', function () {
         ->and($news->source_name)->toBe('Lenta.ru')
         ->and($news->title)->toBe('Новость 1')
         ->and($news->lead)->toBe('Краткий анонс')
-        ->and($news->content)->toBe("Первый абзац.\n\nВторой абзац.");
+        ->and($news->content)->toBe("Первый абзац.\n\nВторой абзац.")
+        ->and($news->published_at->toIso8601String())
+        ->toBe('2026-08-13T11:10:22+00:00');
 
     $this->artisan('news:fetch')
         ->expectsOutput('Saved: 0; skipped: 10; failed: 0.')

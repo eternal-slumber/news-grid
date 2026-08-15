@@ -45,7 +45,7 @@ test('it reads and normalizes Lenta RSS', function () {
         ->and($newsItems[0]->imageUrl)
         ->toBe('https://icdn.lenta.ru/example.jpg')
         ->and($newsItems[0]->publishedAt->toIso8601String())
-        ->toBe('2026-08-13T14:10:22+03:00');
+        ->toBe('2026-08-13T11:10:22+00:00');
 
     Http::assertSentCount(1);
 });
