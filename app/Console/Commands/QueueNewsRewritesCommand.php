@@ -8,6 +8,7 @@ use App\Models\NewsRewrite;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 #[Signature('news:rewrite {news? : News ID} {--latest= : Queue the latest N news} {--force : Requeue completed and failed rewrites}')]
 #[Description('Queue mood rewrites for a news article')]
@@ -67,40 +68,45 @@ final class QueueNewsRewritesCommand extends Command
         $skippedCount = 0;
 
         foreach ($newsItems as $news) {
-            $rewrites = collect(NewsRewrite::MOODS)
-                ->map(fn (string $mood): NewsRewrite => NewsRewrite::query()->firstOrCreate([
-                    'news_id' => $news->id,
-                    'mood' => $mood,
-                ]));
-            $hasNewRewrite = $rewrites->contains->wasRecentlyCreated;
-            $hasActiveRewrite = $rewrites->contains(
-                fn (NewsRewrite $rewrite): bool => ! $rewrite->wasRecentlyCreated
-                    && in_array($rewrite->status, [
-                        NewsRewrite::STATUS_PENDING,
-                        NewsRewrite::STATUS_PROCESSING,
-                    ], true),
-            );
-            $allCompleted = $rewrites->every(
-                fn (NewsRewrite $rewrite): bool => $rewrite->status === NewsRewrite::STATUS_COMPLETED,
-            );
+            $queued = DB::transaction(function () use ($news): bool {
+                $rewrites = collect(NewsRewrite::MOODS)
+                    ->map(fn (string $mood): NewsRewrite => NewsRewrite::query()->firstOrCreate([
+                        'news_id' => $news->id,
+                        'mood' => $mood,
+                    ]));
+                $hasNewRewrite = $rewrites->contains->wasRecentlyCreated;
+                $isProcessing = $rewrites->contains(
+                    fn (NewsRewrite $rewrite): bool => ! $rewrite->wasRecentlyCreated
+                        && $rewrite->status === NewsRewrite::STATUS_PROCESSING,
+                );
+                $allCompleted = $rewrites->every(
+                    fn (NewsRewrite $rewrite): bool => $rewrite->status === NewsRewrite::STATUS_COMPLETED,
+                );
 
-            if ($hasActiveRewrite || (! $hasNewRewrite && $allCompleted && ! $this->option('force'))) {
+                if ($isProcessing || (! $hasNewRewrite && $allCompleted && ! $this->option('force'))) {
+                    return false;
+                }
+
+                $rewrites->each(fn (NewsRewrite $rewrite) => $rewrite->update([
+                    'status' => NewsRewrite::STATUS_PENDING,
+                    'title' => null,
+                    'lead' => null,
+                    'content' => null,
+                    'validation_passed' => null,
+                    'validation_message' => null,
+                    'error_message' => null,
+                ]));
+
+                GenerateNewsRewritesJob::dispatch($news->id)->beforeCommit();
+
+                return true;
+            });
+
+            if (! $queued) {
                 $skippedCount++;
 
                 continue;
             }
-
-            $rewrites->each(fn (NewsRewrite $rewrite) => $rewrite->update([
-                'status' => NewsRewrite::STATUS_PENDING,
-                'title' => null,
-                'lead' => null,
-                'content' => null,
-                'validation_passed' => null,
-                'validation_message' => null,
-                'error_message' => null,
-            ]));
-
-            GenerateNewsRewritesJob::dispatch($news->id);
             $queuedCount++;
         }
 

@@ -17,6 +17,8 @@ use Throwable;
 
 final class OpenRouterClient
 {
+    private const int MAX_RETRY_DELAY_SECONDS = 60;
+
     /**
      * @var array<string, string>
      */
@@ -455,7 +457,10 @@ final class OpenRouterClient
             $retryAfter = $exception->response->header('Retry-After');
 
             if (is_numeric($retryAfter)) {
-                return max(0, (int) $retryAfter) * 1000;
+                return min(
+                    self::MAX_RETRY_DELAY_SECONDS,
+                    max(0, (int) $retryAfter),
+                ) * 1000;
             }
         }
 

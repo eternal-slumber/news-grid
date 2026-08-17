@@ -20,9 +20,9 @@ final class ValidateNewsRewritesJob implements ShouldBeUnique, ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 300;
+    public int $timeout = 7200;
 
-    public int $uniqueFor = 600;
+    public int $uniqueFor = 7500;
 
     public function __construct(public readonly int $newsId) {}
 

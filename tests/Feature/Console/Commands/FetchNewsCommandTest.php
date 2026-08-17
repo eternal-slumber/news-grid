@@ -133,3 +133,43 @@ test('it continues after an article cannot be extracted', function () {
             && $context['url'] === 'https://lenta.ru/news/2026/08/13/failed/'
             && str_contains($context['reason'], 'could not be extracted'));
 });
+
+test('it rolls back an imported article when dispatch fails', function () {
+    Http::preventStrayRequests();
+    Log::spy();
+
+    $queue = Queue::fake();
+    $queue->beforePushing(fn () => throw new RuntimeException('Queue unavailable.'));
+
+    Http::fake([
+        'https://lenta.ru/rss/news' => Http::response(<<<'XML'
+            <?xml version="1.0" encoding="UTF-8"?>
+            <rss version="2.0">
+                <channel>
+                    <item>
+                        <guid>dispatch-failure</guid>
+                        <author>Автор</author>
+                        <title>Новость</title>
+                        <link>https://lenta.ru/news/2026/08/13/dispatch-failure/</link>
+                        <pubDate>Thu, 13 Aug 2026 14:10:22 +0300</pubDate>
+                        <enclosure url="https://icdn.lenta.ru/dispatch-failure.jpg" type="image/jpeg" />
+                        <category>Россия</category>
+                    </item>
+                </channel>
+            </rss>
+            XML),
+        'https://lenta.ru/news/2026/08/13/dispatch-failure/' => Http::response(<<<'HTML'
+            <div class="topic-body__title-yandex">Краткий анонс</div>
+            <div class="topic-body__content">
+                <p class="topic-body__content-text">Полный текст.</p>
+            </div>
+            HTML),
+    ]);
+
+    $this->artisan('news:fetch')
+        ->expectsOutput('Failed to import https://lenta.ru/news/2026/08/13/dispatch-failure/. See log for details.')
+        ->expectsOutput('Saved: 0; skipped: 0; failed: 1.')
+        ->assertFailed();
+
+    expect(News::query()->count())->toBe(0);
+});

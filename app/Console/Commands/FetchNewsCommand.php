@@ -9,6 +9,7 @@ use App\News\LentaRssSource;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -53,21 +54,23 @@ final class FetchNewsCommand extends Command
             try {
                 $articleContent = $this->articleExtractor->extract($newsItem->link);
 
-                $news = News::query()->create([
-                    'external_id' => $newsItem->guid,
-                    'source_name' => LentaRssSource::SOURCE_NAME,
-                    'original_url' => $newsItem->link,
-                    'author' => $newsItem->author,
-                    'category' => $newsItem->category,
-                    'title' => $newsItem->title,
-                    'lead' => $articleContent->lead,
-                    'content' => $articleContent->content,
-                    'image_url' => $newsItem->imageUrl,
-                    'published_at' => $newsItem->publishedAt,
-                    'fetched_at' => now(),
-                ]);
+                DB::transaction(function () use ($articleContent, $newsItem): void {
+                    $news = News::query()->create([
+                        'external_id' => $newsItem->guid,
+                        'source_name' => LentaRssSource::SOURCE_NAME,
+                        'original_url' => $newsItem->link,
+                        'author' => $newsItem->author,
+                        'category' => $newsItem->category,
+                        'title' => $newsItem->title,
+                        'lead' => $articleContent->lead,
+                        'content' => $articleContent->content,
+                        'image_url' => $newsItem->imageUrl,
+                        'published_at' => $newsItem->publishedAt,
+                        'fetched_at' => now(),
+                    ]);
 
-                GenerateNewsRewritesJob::dispatch($news->id);
+                    GenerateNewsRewritesJob::dispatch($news->id)->beforeCommit();
+                });
             } catch (Throwable $exception) {
                 $failedCount++;
 

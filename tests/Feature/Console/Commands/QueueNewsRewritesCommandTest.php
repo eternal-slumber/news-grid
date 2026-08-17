@@ -20,11 +20,45 @@ test('it queues one generation job without duplicate rewrites', function () {
     Queue::assertPushed(GenerateNewsRewritesJob::class, 1);
 
     $this->artisan('news:rewrite', ['news' => $news->id])
-        ->expectsOutput('Queued: 0; skipped: 1.')
+        ->expectsOutput('Queued: 1; skipped: 0.')
         ->assertSuccessful();
 
     expect($news->rewrites()->count())->toBe(3);
     Queue::assertPushed(GenerateNewsRewritesJob::class, 1);
+});
+
+test('it safely requeues orphaned pending rewrites', function () {
+    Queue::fake();
+
+    $news = News::factory()->create();
+
+    foreach (NewsRewrite::MOODS as $mood) {
+        NewsRewrite::factory()->for($news)->create([
+            'mood' => $mood,
+            'status' => NewsRewrite::STATUS_PENDING,
+        ]);
+    }
+
+    $this->artisan('news:rewrite', [
+        'news' => $news->id,
+        '--force' => true,
+    ])
+        ->expectsOutput('Queued: 1; skipped: 0.')
+        ->assertSuccessful();
+
+    Queue::assertPushed(GenerateNewsRewritesJob::class, 1);
+});
+
+test('it rolls back rewrite state when dispatch fails', function () {
+    $queue = Queue::fake();
+    $queue->beforePushing(fn () => throw new RuntimeException('Queue unavailable.'));
+
+    $news = News::factory()->create();
+
+    expect(fn () => $this->artisan('news:rewrite', ['news' => $news->id])->run())
+        ->toThrow(RuntimeException::class, 'Queue unavailable.');
+
+    expect($news->rewrites()->count())->toBe(0);
 });
 
 test('it rejects an unknown news ID', function () {

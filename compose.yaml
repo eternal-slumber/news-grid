@@ -13,7 +13,7 @@ x-laravel-environment: &laravel-environment
   CACHE_STORE: database
   SESSION_DRIVER: database
   QUEUE_CONNECTION: database
-  DB_QUEUE_RETRY_AFTER: 360
+  DB_QUEUE_RETRY_AFTER: 7500
   AI_PROVIDER: ${AI_PROVIDER:-lmstudio}
   AI_API_KEY: ${AI_API_KEY:-}
   OPENAI_MODEL: ${OPENAI_MODEL:-google/gemma-4-e4b}
@@ -61,7 +61,7 @@ services:
   worker:
     image: news-grid-app
     environment: *laravel-environment
-    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--timeout=300"]
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--timeout=7200"]
     depends_on:
       app:
         condition: service_healthy

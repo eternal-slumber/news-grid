@@ -24,6 +24,20 @@ beforeEach(function () {
     Http::preventStrayRequests();
 });
 
+test('queue visibility and unique locks exceed AI job timeouts', function () {
+    $generationJob = new GenerateNewsRewritesJob(1);
+    $validationJob = new ValidateNewsRewritesJob(1);
+    $retryAfter = config('queue.connections.database.retry_after');
+
+    expect($generationJob->timeout)->toBe(600)
+        ->and($validationJob->timeout)->toBe(7200)
+        ->and($retryAfter)->toBe(7500)
+        ->and($retryAfter)->toBeGreaterThan($generationJob->timeout)
+        ->and($retryAfter)->toBeGreaterThan($validationJob->timeout)
+        ->and($generationJob->uniqueFor)->toBeGreaterThanOrEqual($retryAfter)
+        ->and($validationJob->uniqueFor)->toBeGreaterThanOrEqual($retryAfter);
+});
+
 test('generation stores all moods and queues one validation job', function () {
     Http::fake([
         'https://openrouter.test/chat/completions' => Http::response(
