@@ -30,31 +30,31 @@ News Grid — небольшое новостное приложение, в к�
 
 Главная страница оформлена как цифровая газетная полоса. В верхней части находятся источник и общий переключатель эмоциональной подачи.
 
-![Шапка News Grid и переключатель настроения](screenshots/header.png)
+![Шапка News Grid и переключатель настроения](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/header.png)
 
 Первый экран выделяет основную новость и несколько дополнительных материалов.
 
-![Основная новостная сетка](screenshots/main-grid.png)
+![Основная новостная сетка](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/main-grid.png)
 
 Остальные материалы отображаются компактным трёхколоночным гридом.
 
-![Дополнительные новости в сетке](screenshots/secondary-grid.png)
+![Дополнительные новости в сетке](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/secondary-grid.png)
 
 После переключения режима заголовки и лиды меняются прямо в сетке. Под изменённым текстом появляется отметка о том, что факты взяты из оригинала.
 
-![Новости в выбранной эмоциональной подаче](screenshots/rewrite-on-grid.png)
+![Новости в выбранной эмоциональной подаче](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/rewrite-on-grid.png)
 
 На странице материала оригинал расположен слева, а выбранная и прошедшая фактчек версия — справа.
 
-![Сравнение оригинала и ироничной версии](screenshots/news-comparison.png)
+![Сравнение оригинала и ироничной версии](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/news-comparison.png)
 
 Каждую колонку можно развернуть в отдельный режим чтения.
 
-![Полноэкранное чтение оригинала](screenshots/news-fullscreen.png)
+![Полноэкранное чтение оригинала](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/news-fullscreen.png)
 
 В нижней части доступны результат автоматической проверки и прямая ссылка на первоисточник.
 
-![Результат фактчека и ссылка на источник](screenshots/footer.png)
+![Результат фактчека и ссылка на источник](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/footer.png)
 
 ## Как это работает
 
