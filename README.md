@@ -30,31 +30,31 @@ News Grid — небольшое новостное приложение, в к�
 
 Главная страница оформлена как цифровая газетная полоса. В верхней части находятся источник и общий переключатель эмоциональной подачи.
 
-![Шапка News Grid и переключатель настроения](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/header.png)
+<img src="https://github.com/eternal-slumber/news-grid/blob/main/screenshots/header.png?raw=true" alt="Шапка News Grid и переключатель настроения" width="100%">
 
 Первый экран выделяет основную новость и несколько дополнительных материалов.
 
-![Основная новостная сетка](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/main-grid.png)
+<img src="https://github.com/eternal-slumber/news-grid/blob/main/screenshots/main-grid.png?raw=true" alt="Основная новостная сетка" width="100%">
 
 Остальные материалы отображаются компактным трёхколоночным гридом.
 
-![Дополнительные новости в сетке](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/secondary-grid.png)
+<img src="https://github.com/eternal-slumber/news-grid/blob/main/screenshots/secondary-grid.png?raw=true" alt="Дополнительные новости в сетке" width="100%">
 
 После переключения режима заголовки и лиды меняются прямо в сетке. Под изменённым текстом появляется отметка о том, что факты взяты из оригинала.
 
-![Новости в выбранной эмоциональной подаче](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/rewrite-on-grid.png)
+<img src="https://github.com/eternal-slumber/news-grid/blob/main/screenshots/rewrite-on-grid.png?raw=true" alt="Новости в выбранной эмоциональной подаче" width="100%">
 
 На странице материала оригинал расположен слева, а выбранная и прошедшая фактчек версия — справа.
 
-![Сравнение оригинала и ироничной версии](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/news-comparison.png)
+<img src="https://github.com/eternal-slumber/news-grid/blob/main/screenshots/news-comparison.png?raw=true" alt="Сравнение оригинала и ироничной версии" width="100%">
 
 Каждую колонку можно развернуть в отдельный режим чтения.
 
-![Полноэкранное чтение оригинала](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/news-fullscreen.png)
+<img src="https://github.com/eternal-slumber/news-grid/blob/main/screenshots/news-fullscreen.png?raw=true" alt="Полноэкранное чтение оригинала" width="100%">
 
 В нижней части доступны результат автоматической проверки и прямая ссылка на первоисточник.
 
-![Результат фактчека и ссылка на источник](https://raw.githubusercontent.com/eternal-slumber/news-grid/main/screenshots/footer.png)
+<img src="https://github.com/eternal-slumber/news-grid/blob/main/screenshots/footer.png?raw=true" alt="Результат фактчека и ссылка на источник" width="100%">
 
 ## Как это работает
 
