@@ -1,12 +1,15 @@
 <?php
 
+use App\Jobs\GenerateNewsRewritesJob;
 use App\Models\News;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 
 test('it stores new articles once', function () {
     Http::preventStrayRequests();
+    Queue::fake();
 
     $rssItems = collect(range(1, 10))->map(function (int $number): string {
         return <<<XML
@@ -50,6 +53,7 @@ test('it stores new articles once', function () {
         ->assertSuccessful();
 
     expect(News::query()->count())->toBe(10);
+    Queue::assertPushed(GenerateNewsRewritesJob::class, 10);
 
     $news = News::query()->orderBy('id')->firstOrFail();
 
@@ -70,12 +74,14 @@ test('it stores new articles once', function () {
             fn (Request $request): bool => $request->url() !== 'https://lenta.ru/rss/news',
         ))->toHaveCount(10);
 
+    Queue::assertPushed(GenerateNewsRewritesJob::class, 10);
     Http::assertSentCount(12);
 });
 
 test('it continues after an article cannot be extracted', function () {
     Http::preventStrayRequests();
     Log::spy();
+    Queue::fake();
 
     Http::fake([
         'https://lenta.ru/rss/news' => Http::response(<<<'XML'
@@ -114,6 +120,12 @@ test('it continues after an article cannot be extracted', function () {
         ->assertFailed();
 
     expect(News::query()->sole()->external_id)->toBe('valid-article');
+
+    Queue::assertPushed(
+        GenerateNewsRewritesJob::class,
+        fn (GenerateNewsRewritesJob $job): bool => $job->newsId === News::query()->sole()->id,
+    );
+    Queue::assertPushed(GenerateNewsRewritesJob::class, 1);
 
     Log::shouldHaveReceived('warning')
         ->once()

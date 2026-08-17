@@ -6,6 +6,7 @@ use Database\Factories\NewsFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -41,6 +42,14 @@ class News extends Model
     use HasFactory;
 
     public $timestamps = false;
+
+    /**
+     * @return HasMany<NewsRewrite, $this>
+     */
+    public function rewrites(): HasMany
+    {
+        return $this->hasMany(NewsRewrite::class);
+    }
 
     /**
      * @return array<string, string>

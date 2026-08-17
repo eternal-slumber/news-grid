@@ -13,7 +13,15 @@ x-laravel-environment: &laravel-environment
   CACHE_STORE: database
   SESSION_DRIVER: database
   QUEUE_CONNECTION: database
-  DB_QUEUE_RETRY_AFTER: 180
+  DB_QUEUE_RETRY_AFTER: 360
+  AI_PROVIDER: ${AI_PROVIDER:-lmstudio}
+  AI_API_KEY: ${AI_API_KEY:-}
+  OPENAI_MODEL: ${OPENAI_MODEL:-google/gemma-4-e4b}
+  OPENAI_URL: ${OPENAI_URL:-http://host.docker.internal:1234/v1/chat/completions}
+  OPENAI_CONNECT_TIMEOUT: ${OPENAI_CONNECT_TIMEOUT:-5}
+  OPENAI_TIMEOUT: ${OPENAI_TIMEOUT:-240}
+  OPENAI_REWRITE_MAX_TOKENS: ${OPENAI_REWRITE_MAX_TOKENS:-12000}
+  OPENAI_VALIDATION_MAX_TOKENS: ${OPENAI_VALIDATION_MAX_TOKENS:-3000}
 
 services:
   app:
@@ -53,11 +61,11 @@ services:
   worker:
     image: news-grid-app
     environment: *laravel-environment
-    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--timeout=120"]
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--timeout=300"]
     depends_on:
       app:
         condition: service_healthy
-    stop_grace_period: 130s
+    stop_grace_period: 310s
     restart: unless-stopped
 
 volumes:

@@ -3,5 +3,6 @@
 use App\Http\Controllers\NewsController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
-Route::get('news', NewsController::class)->name('news.index');
+Route::get('/', [NewsController::class, 'index'])->name('news.index');
+Route::redirect('news', '/');
+Route::get('news/{news}', [NewsController::class, 'show'])->name('news.show');

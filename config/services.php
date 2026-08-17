@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'openrouter' => [
+        'provider' => env('AI_PROVIDER', 'openrouter'),
+        'key' => env('AI_API_KEY'),
+        'model' => env('OPENAI_MODEL'),
+        'url' => env('OPENAI_URL'),
+        'connect_timeout' => (int) env('OPENAI_CONNECT_TIMEOUT', 5),
+        'timeout' => (int) env('OPENAI_TIMEOUT', 60),
+        'rewrite_max_tokens' => (int) env('OPENAI_REWRITE_MAX_TOKENS', 12000),
+        'validation_max_tokens' => (int) env('OPENAI_VALIDATION_MAX_TOKENS', 3000),
+    ],
+
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\GenerateNewsRewritesJob;
 use App\Models\News;
 use App\News\LentaArticleExtractor;
 use App\News\LentaRssSource;
@@ -52,7 +53,7 @@ final class FetchNewsCommand extends Command
             try {
                 $articleContent = $this->articleExtractor->extract($newsItem->link);
 
-                News::query()->create([
+                $news = News::query()->create([
                     'external_id' => $newsItem->guid,
                     'source_name' => LentaRssSource::SOURCE_NAME,
                     'original_url' => $newsItem->link,
@@ -65,6 +66,8 @@ final class FetchNewsCommand extends Command
                     'published_at' => $newsItem->publishedAt,
                     'fetched_at' => now(),
                 ]);
+
+                GenerateNewsRewritesJob::dispatch($news->id);
             } catch (Throwable $exception) {
                 $failedCount++;
 
